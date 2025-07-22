@@ -7,8 +7,6 @@
   <img src="https://user-images.githubusercontent.com/74038190/213844263-a8897a51-32f4-4b3b-b5c2-e1528b89f6f3.png" width="25px" />
 </div>
 
----
-
 ## 🚀 About Me
 
 I'm a passionate **full-stack developer** who loves exploring new technologies and building impactful projects. Currently focused on learning and mastering modern web development technologies with a strong emphasis on scalable architecture and clean code.
