@@ -58,14 +58,14 @@ jobs:
           fi
           echo $count > COMMIT_COUNT
           
-          # Create a simple README update
-          echo "# 🤖 Auto Activity Repository" > README.md
-          echo "" >> README.md
-          echo "This repository tracks daily automated activity." >> README.md
-          echo "" >> README.md
-          echo "- **Last Updated:** $current_time" >> README.md
-          echo "- **Total Updates:** $count" >> README.md
-          echo "- **Status:** 🟢 Active" >> README.md
+          # Create activity status file instead of README
+          echo "# 🤖 Activity Status" > ACTIVITY_STATUS.md
+          echo "" >> ACTIVITY_STATUS.md
+          echo "This file tracks daily automated activity." >> ACTIVITY_STATUS.md
+          echo "" >> ACTIVITY_STATUS.md
+          echo "- **Last Updated:** $current_time" >> ACTIVITY_STATUS.md
+          echo "- **Total Updates:** $count" >> ACTIVITY_STATUS.md
+          echo "- **Status:** 🟢 Active" >> ACTIVITY_STATUS.md
 
       - name: 🎲 Generate Commit Message
         id: message
