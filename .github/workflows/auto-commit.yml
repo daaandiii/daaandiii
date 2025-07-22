@@ -1,0 +1,113 @@
+name: 🤖 Daily Auto Commit
+
+on:
+  schedule:
+    # Morning commit (8-10 AM UTC = 3-5 PM WIB)
+    - cron: "0 8 * * *"
+    # Evening commit (14-16 PM UTC = 9-11 PM WIB) 
+    - cron: "0 14 * * *"
+  
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  auto_commit:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: ⏱️ Random Delay
+        run: |
+          # Random delay 0-120 minutes to make commits more natural
+          delay=$((RANDOM % 7200))
+          echo "Delaying for $delay seconds..."
+          sleep $delay
+
+      - name: 🔧 Setup Git
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions Bot"
+
+      - name: 📝 Generate Daily Activity
+        run: |
+          # Get current time
+          current_time=$(date '+%Y-%m-%d %H:%M:%S')
+          current_date=$(date '+%Y-%m-%d')
+          
+          # Update main activity file
+          echo "Last updated: $current_time" > LAST_UPDATED
+          
+          # Create or update daily log
+          mkdir -p logs
+          echo "[$current_time] Automated daily activity" >> logs/daily-activity.log
+          
+          # Keep logs manageable (last 50 entries)
+          tail -n 50 logs/daily-activity.log > logs/temp.log && mv logs/temp.log logs/daily-activity.log
+          
+          # Update simple counter
+          if [ -f COMMIT_COUNT ]; then
+            count=$(cat COMMIT_COUNT)
+            count=$((count + 1))
+          else
+            count=1
+          fi
+          echo $count > COMMIT_COUNT
+          
+          # Create a simple README update
+          echo "# 🤖 Auto Activity Repository" > README.md
+          echo "" >> README.md
+          echo "This repository tracks daily automated activity." >> README.md
+          echo "" >> README.md
+          echo "- **Last Updated:** $current_time" >> README.md
+          echo "- **Total Updates:** $count" >> README.md
+          echo "- **Status:** 🟢 Active" >> README.md
+
+      - name: 🎲 Generate Commit Message
+        id: message
+        run: |
+          # Arrays for natural commit messages
+          activities=("update" "sync" "maintain" "refresh" "track" "log")
+          times=("daily" "routine" "scheduled" "auto" "regular")
+          emojis=("📝" "🔄" "⚡" "🚀" "📊" "🌟" "✨" "🔧" "📈" "🎯")
+          
+          # Random selections
+          activity=${activities[$RANDOM % ${#activities[@]}]}
+          time=${times[$RANDOM % ${#times[@]}]}
+          emoji=${emojis[$RANDOM % ${#emojis[@]}]}
+          
+          # Create commit message
+          message="feat: $emoji $time $activity"
+          echo "message=$message" >> $GITHUB_OUTPUT
+          echo "Generated message: $message"
+
+      - name: 💾 Commit & Push
+        run: |
+          # Add all changes
+          git add .
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit, creating a timestamp change..."
+            date > .timestamp
+            git add .timestamp
+          fi
+          
+          # Commit with generated message
+          git commit -m "${{ steps.message.outputs.message }}"
+          
+          # Push changes
+          git push origin main || git push origin master
+          
+          echo "✅ Successfully committed and pushed!"
+
+      - name: 📋 Summary
+        run: |
+          echo "## 🤖 Auto Commit Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- **Time:** $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Message:** ${{ steps.message.outputs.message }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ✅ Success" >> $GITHUB_STEP_SUMMARY
